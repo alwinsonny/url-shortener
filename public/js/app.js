@@ -9,7 +9,8 @@ if (expiryToggle && expiryField && expiryInput) {
     expiryToggle.addEventListener('change', () => {
       if (expiryToggle.checked) {
         expiryField.classList.remove('hidden');
-        const d   = new Date();
+       // const d = new Date();
+        const d   = new Date(Date.now() + 60 * 1000); // default to 1 min from current date and time
         const pad = (n) => String(n).padStart(2, '0');
         expiryInput.value = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
                         + `T${pad(d.getHours())}:${pad(d.getMinutes())}`;
