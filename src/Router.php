@@ -14,6 +14,7 @@ final class Router
     public function __construct(
         private readonly Request       $request,
         private readonly UrlRepository $repository,
+        private readonly UrlValidator  $validator,
         private readonly string        $basePath,
         private readonly string        $baseUrl,
     ) {}
@@ -22,10 +23,51 @@ final class Router
     {
         $path = $this->resolveLocalPath($this->request->getPath());
 
+        if ($path === '/') {
+            $this->request->isPost() ? $this->handleCreate() : $this->handleForm();
+            return;
+        }
+
         $this->handleRedirect(ltrim($path, '/'));
     }
 
-    // TODO: Need to fix the refreshing of the page and from resubmission
+    private function handleForm(?string $error = null, ?string $shortUrl = null): void
+    {
+        http_response_code(200);
+        $this->view->renderForm($error, $shortUrl);
+    }
+
+    private function handleCreate(): void
+    {
+        $rawUrl = $this->request->post('url');
+
+     
+
+        try {
+            $longUrl = $this->validator->validate($rawUrl);
+        } catch (InvalidArgumentException $e) {
+            $this->handleForm($e->getMessage());
+            return;
+        }
+
+        try {
+            $expiresAt = $this->parseExpiry();
+        } catch (InvalidArgumentException $e) {
+            $this->handleForm($e->getMessage());
+            return;
+        }
+
+        try {
+            $code     = $this->repository->store($longUrl, $expiresAt);
+            $shortUrl = $this->buildShortUrl($code);
+        } catch (RuntimeException $e) {
+            $this->handleForm('Something went wrong. Please try again.');
+            return;
+        }
+
+        $this->handleForm(null, $shortUrl);
+    }
+
     private function handleRedirect(string $code): void
     {
         if (!preg_match(self::CODE_PATTERN, $code)) {
@@ -89,4 +131,10 @@ final class Router
         return '/' . ltrim($requestPath, '/');
     }
 
+    private function buildShortUrl(string $code): string
+    {
+        $raw = rtrim($this->baseUrl, '/') . '/' . ltrim($this->basePath, '/') . '/' . $code;
+
+        return (string) preg_replace('#(?<!:)/{2,}#', '/', $raw);
+    }
 }
