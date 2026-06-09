@@ -53,8 +53,8 @@ try {
     $router = new Router(
         new Request(),
         new UrlRepository($db->getConnection()),
-        new UrlValidator(),
-        
+        new UrlValidator(), 
+        $view,
         $basePath,
         $baseUrl
     );
