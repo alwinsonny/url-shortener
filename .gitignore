@@ -1,0 +1,9 @@
+# SQLite database
+storage/*.db
+storage/*.sqlite
+storage/*.sqlite3
+
+
+# OS / IDE
+.DS_Store
+Thumbs.db
