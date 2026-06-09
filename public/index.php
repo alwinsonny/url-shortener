@@ -33,6 +33,7 @@ require_once dirname(__DIR__) . '/autoload.php';
 use UrlShortener\Database;
 use UrlShortener\Request;
 use UrlShortener\Router;
+use UrlShortener\UrlRepository;
 
 $scheme   = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
 $host     = $_SERVER['HTTP_HOST'] ?? 'localhost';
@@ -48,6 +49,7 @@ try {
 
     $router = new Router(
         new Request(),
+        new UrlRepository($db->getConnection()),
         $basePath,
         $baseUrl
     );

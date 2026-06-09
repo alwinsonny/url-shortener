@@ -13,6 +13,7 @@ final class Router
 
     public function __construct(
         private readonly Request       $request,
+        private readonly UrlRepository $repository,
         private readonly string        $basePath,
         private readonly string        $baseUrl,
     ) {}
@@ -32,16 +33,8 @@ final class Router
             return;
         }
 
-       // TODO need to fix  data from database
-        $testData = [
-            'abc123' => [
-                'id'         => 1,
-                'code'       => 'abc123',
-                'long_url'   => 'https://google.com',
-                'created_at' => time(),
-                'expires_at' => null, 
-            ]];
-        $row = $testData; // TODO replace the test data with db data.
+        $row = $this->repository->findByCode($code);
+
         if ($row === null) {
             $this->render404();
             return;
