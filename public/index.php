@@ -34,6 +34,8 @@ use UrlShortener\Database;
 use UrlShortener\Request;
 use UrlShortener\Router;
 use UrlShortener\UrlRepository;
+use UrlShortener\UrlValidator;
+use UrlShortener\View;
 
 $scheme   = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
 $host     = $_SERVER['HTTP_HOST'] ?? 'localhost';
@@ -46,11 +48,13 @@ if (str_ends_with($basePath, '/index.php')) {
 
 try {
     $db   = new Database(dirname(__DIR__) . '/storage/urls.db');
+    $view = new View($baseUrl, $basePath);
 
     $router = new Router(
         new Request(),
         new UrlRepository($db->getConnection()),
         new UrlValidator(),
+        
         $basePath,
         $baseUrl
     );
