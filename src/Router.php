@@ -15,6 +15,7 @@ final class Router
         private readonly Request       $request,
         private readonly UrlRepository $repository,
         private readonly UrlValidator  $validator,
+        private readonly View          $view,
         private readonly string        $basePath,
         private readonly string        $baseUrl,
     ) {}
@@ -95,7 +96,7 @@ final class Router
     private function render404(string $reason = 'The short URL you requested could not be found.'): void
     {
         http_response_code(404);
-        // TODO need to render a 404 page
+        $this->view->render404($reason);
     }
 
     // Reads the timestamp as unix
