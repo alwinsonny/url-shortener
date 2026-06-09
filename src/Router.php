@@ -34,6 +34,11 @@ final class Router
 
     private function handleForm(?string $error = null, ?string $shortUrl = null): void
     {
+        $error    ??= $_SESSION['error']     ?? null;
+        $shortUrl ??= $_SESSION['short_url'] ?? null;
+
+        unset($_SESSION['error'], $_SESSION['short_url']);
+
         http_response_code(200);
         $this->view->renderForm($error, $shortUrl);
     }
@@ -42,31 +47,40 @@ final class Router
     {
         $rawUrl = $this->request->post('url');
 
-     
-
         try {
             $longUrl = $this->validator->validate($rawUrl);
         } catch (InvalidArgumentException $e) {
-            $this->handleForm($e->getMessage());
-            return;
+            $_SESSION['error'] = $e->getMessage();
+            $this->redirectToForm();
         }
 
         try {
             $expiresAt = $this->parseExpiry();
         } catch (InvalidArgumentException $e) {
-            $this->handleForm($e->getMessage());
-            return;
+            $_SESSION['error'] = $e->getMessage();
+            $this->redirectToForm();
         }
 
         try {
-            $code     = $this->repository->store($longUrl, $expiresAt);
-            $shortUrl = $this->buildShortUrl($code);
+            $code                  = $this->repository->store($longUrl, $expiresAt);
+            $_SESSION['short_url'] = $this->buildShortUrl($code);
+            $this->redirectToForm();
         } catch (RuntimeException $e) {
-            $this->handleForm('Something went wrong. Please try again.');
-            return;
+            $_SESSION['error'] = 'Something went wrong. Please try again.';
+            $this->redirectToForm();
+        }
+    }
+
+    private function redirectToForm(): void
+    {
+        $url = rtrim($this->baseUrl, '/');
+
+        if ($this->basePath !== '') {
+            $url .= '/' . trim($this->basePath, '/');
         }
 
-        $this->handleForm(null, $shortUrl);
+        header('Location: ' . $url, true, 302);
+        exit;
     }
 
     private function handleRedirect(string $code): void
@@ -87,8 +101,6 @@ final class Router
             $this->render404('This link has expired.');
             return;
         }
-
-        // 302 not 301 — links can expire so  don't want browsers caching the redirect
         header('Location: ' . $row['long_url'], true, 302);
         exit;
     }
@@ -99,7 +111,6 @@ final class Router
         $this->view->render404($reason);
     }
 
-    // Reads the timestamp as unix
     private function parseExpiry(): ?int
     {
         $ts = trim($this->request->post('expires_ts'));
