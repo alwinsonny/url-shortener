@@ -10,7 +10,8 @@ I wrote a minimal PSR-4 autoloader rather than pulling in Composer. For a projec
 
 ## Expiry handling
 
-Expiry is stored as a Unix timestamp in the database. I briefly considered storing it as a datetime string but timestamps make the expiry check a simple integer comparison — no timezone parsing needed at runtime. The browser converts the user's local datetime to a UTC Unix timestamp before submitting, which means PHP never has to deal with timezone conversion at all.
+Expiry is stored as a Unix timestamp in the database. I  considered storing it as a datetime string but timestamps make the expiry check a simple integer comparison — no timezone parsing needed at runtime. The browser converts the user's local datetime to a UTC Unix timestamp before submitting, which means PHP never has to deal with timezone conversion at all.
+Also by default the expiry time is set to current time + 1min.
 
 Expired links return a 404 rather than a different status code. A 404 is the clearest signal that the resource isn't available, without leaking whether the link ever existed.
 
