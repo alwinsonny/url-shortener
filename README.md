@@ -12,14 +12,20 @@ A simple URL shortener built with PHP ,SQLite,Tailwind and vanila JS. Paste a lo
 
 ## Running locally
 
+- Clone the repository
 ```bash
-php -S localhost:8000 -t public public/index.php
+    git clone https://github.com/alwinsonny/url-shortener.git
+    cd url-shortener
 ```
+- Start the server
+```bash
+    php -S localhost:8000 -t public public/index.php
+```
+- Then 
+    Open `http://localhost:8000` in your browser. The database is created automatically on first run.
 
-Open `http://localhost:8000` in your browser. The database is created automatically on first run.
-
-If you get a database error on first run, set write permission on the storage directory:
+- If you get a database error on first run, set write permission on the storage directory:
 
 ```bash
-chmod 755 storage
+    chmod 755 storage
 ```
