@@ -63,8 +63,10 @@ if (copyBtn) {
 
         try {
             if (navigator.clipboard && window.isSecureContext) {
+                    // Modern API — used on HTTPS
                 await navigator.clipboard.writeText(url);
             } else {
+                    // Fallback — used on HTTP (localhost)
                 const ta          = document.createElement('textarea');
                 ta.value          = url;
                 ta.style.position = 'fixed';
